@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "${INFLUXDB_PORT}:8086"
+    volumes:
+      - ./influxdb:/var/lib/influxdb
+    env_file:
+      - .env
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    user: "472:472"   #  ensures Grafana runs with correct permissions
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+    depends_on:
+      - influxdb
+    env_file:
+      - .env
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
